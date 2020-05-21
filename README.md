@@ -1,6 +1,6 @@
 # Robust-GPR-based-online-trajectory-prediction-for-UAVs
 
-This repository contains the MATLAB code for the numerical experiments in the paper "Efficient and Robust Online Trajectory Prediction for Non-cooperative Unmanned Aerial Vehicles".
+This repository contains the MATLAB code for the numerical experiments in the paper "Efficient and Robust Online Trajectory Prediction for Non-cooperative Unmanned Aerial Vehicles". Note that the code depends on the GPML package. 
 
 "Trajectory_GUCT.m" is the main file to run the GUCT framework.
 
