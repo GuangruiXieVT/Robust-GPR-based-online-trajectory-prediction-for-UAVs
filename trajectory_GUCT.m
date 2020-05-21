@@ -69,14 +69,14 @@ e3_pred = 10000;
 sigma2_1 = 1;
 sigma2_2 = 1;
 sigma2_3 = 1;
-X_train_la = data_scaled(2:pred_start-2,4:6);
+X_train_la = data_scaled(2:pred_start-2,1:6);
 y_train_la = pred_error(3:pred_start-1,1);
-X_train_lo = data_scaled(2:pred_start-2,4:6);
+X_train_lo = data_scaled(2:pred_start-2,1:6);
 y_train_lo = pred_error(3:pred_start-1,2);
-X_train_al = data_scaled(2:pred_start-2,4:6);
+X_train_al = data_scaled(2:pred_start-2,1:6);
 y_train_al = pred_error(3:pred_start-1,3);
 
-ell = ones(3,1)
+ell = ones(6,1);
 hyp0.cov = log([ell;sf]); 
 hyp_la = minimize(hyp0 , @gp, -Ncg , inf , mf , cf , lf , X_train_la, y_train_la);
 hyp_lo = minimize(hyp0 , @gp, -Ncg , inf , mf , cf , lf , X_train_lo, y_train_lo);
@@ -87,19 +87,19 @@ for pred_start = train_window+3 : length(data_scaled)-pred_horizon+1
     % change-point detection
     e1_det = fault_detect(e1_pred,sigma2_1,alpha);
     if e1_det
-        ell = ones(3,1);
+        ell = ones(6,1);
         hyp0.cov = log([ell;sf]); 
         hyp_la = minimize(hyp0 , @gp, -Ncg , inf , mf , cf , lf , X_train_la, y_train_la);
     end
     e2_det = fault_detect(e2_pred,sigma2_2,alpha);
     if e2_det
-        ell = ones(3,1);
+        ell = ones(6,1);
         hyp0.cov = log([ell;sf]); 
         hyp_lo = minimize(hyp0 , @gp, -Ncg , inf , mf , cf , lf , X_train_lo, y_train_lo);
     end
     e3_det = fault_detect(e3_pred,sigma2_3,alpha);
     if e3_det
-        ell = ones(3,1);
+        ell = ones(6,1);
         hyp0.cov = log([ell;sf]); 
         hyp_al = minimize(hyp0 , @gp, -Ncg , inf , mf , cf , lf , X_train_al, y_train_al);
     end
@@ -108,26 +108,26 @@ for pred_start = train_window+3 : length(data_scaled)-pred_horizon+1
     v_la = v(pred_start-1,1);
     v_lo = v(pred_start-1,2);
     v_al = v(pred_start-1,3);
-    X_test_la = data_scaled(pred_start-1,4:6);
-    X_test_lo = data_scaled(pred_start-1,4:6);
-    X_test_al = data_scaled(pred_start-1,4:6);
+    X_test_la = data_scaled(pred_start-1,1:6);
+    X_test_lo = data_scaled(pred_start-1,1:6);
+    X_test_al = data_scaled(pred_start-1,1:6);
     
-    % Collect training data and training GPR models
+    % Collect training data and train GPR models
     [X_train_temp, y_train_temp] = DHMP(hyp_la, inf, mf, cf, lf, X_train_la, y_train_la, X_test_la, epsilon);
     [y_pred_la, s2_pred_la] = gp(hyp_la, inf, mf , cf , lf,  X_train_temp, y_train_temp, X_test_la);
     X_train_la = [X_train_temp;X_test_la];
     y_train_la = [y_train_temp;pred_error(pred_start,1)];
-    [beta_la, gamma_la] = get_beta_gamma(hyp_la, mf, cf, lf, X_train_temp, y_train_temp, repmat(X_test_la,5,1), 3, 1e-1, 0.04, 0.01);
+    [beta_la, gamma_la] = get_beta_gamma(hyp_la, mf, cf, lf, X_train_temp, y_train_temp, repmat(X_test_la,5,1), 6, 1e-1, 0.04, 0.01);
     [X_train_temp, y_train_temp] = DHMP(hyp_lo, inf, mf, cf, lf, X_train_lo, y_train_lo, X_test_lo, epsilon);
     [y_pred_lo, s2_pred_lo] = gp(hyp_lo, inf, mf , cf , lf,  X_train_temp, y_train_temp, X_test_lo);
     X_train_lo = [X_train_temp;X_test_lo];
     y_train_lo = [y_train_temp;pred_error(pred_start,2)];
-    [beta_lo, gamma_lo] = get_beta_gamma(hyp_lo, mf, cf, lf, X_train_temp, y_train_temp, repmat(X_test_lo,5,1), 3, 1e-1, 0.04, 0.01);
+    [beta_lo, gamma_lo] = get_beta_gamma(hyp_lo, mf, cf, lf, X_train_temp, y_train_temp, repmat(X_test_lo,5,1), 6, 1e-1, 0.04, 0.01);
     [X_train_temp, y_train_temp] = DHMP(hyp_al, inf, mf, cf, lf, X_train_al, y_train_al, X_test_al, epsilon);
     [y_pred_al, s2_pred_al] = gp(hyp_al, inf, mf , cf , lf,  X_train_temp, y_train_temp, X_test_al);
     X_train_al= [X_train_temp;X_test_al];
     y_train_al = [y_train_temp;pred_error(pred_start,3)];
-    [beta_al, gamma_al] = get_beta_gamma(hyp_al, mf, cf, lf, X_train_temp, y_train_temp, repmat(X_test_al,5,1), 3, 1e-1, 0.04, 0.01);
+    [beta_al, gamma_al] = get_beta_gamma(hyp_al, mf, cf, lf, X_train_temp, y_train_temp, repmat(X_test_al,5,1), 6, 1e-1, 0.04, 0.01);
     
     i = 1:pred_horizon;
     v1_test = i*v(pred_start-1,1);
